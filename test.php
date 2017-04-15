@@ -1,32 +1,44 @@
 <?php 
- function getdata(){
-		$list = file_get_contents("listing.txt");
-		$list = explode("***", $list);
-		$list = array_diff($list, array(""));
-		$list = array_combine(array_merge(array_slice(array_keys($list), 1), array(count($list))), array_values($list));
-		
-	return $list;
-
-} 
-
-	echo " выберите вариант теста<br><br>";
-	$varcount = scandir('downloads');
-	foreach ($varcount as $file)
+error_reporting(-1);
+if (!isset($_GET['var']) || !isset($_POST['var']))
 	{
-		if($file !='.' && $file != '..')
-		{
-			$file = str_replace(".json", "", $file);
-			echo "<h4><a href='test.php"."?var=$file'>$file</a></h4>";
-			echo "<br>";
-		}
+		echo " выберите вариант теста : <br><br>";
+		$var = '';
 	}
-$list = getdata();
+$tests = scandir('downloads');
+for($i=2; $i<count($tests); $i++)
+{
+	$tests[$i] = str_replace(".json", "", $tests[$i]);
+	echo "<h4><a href='test.php"."?var=$tests[$i]'>$tests[$i]</a></h4>";
+	echo "<br>";
+}
+if (!empty($_GET['var'])) 
+	{
+		$var = (int)$_GET['var'];		
+	}
+if(!empty($_POST['var']))	
+	{
+		$var = $_POST['test_var'];
+	}
 
-@$var = (int)$_GET['var'];
-
-@$test = $list[$var];
-
-$test = json_decode($test, true);
+function  gettest($var)
+	{
+		if($var)
+		{
+		 	$tests =  scandir('downloads');
+		 	for ($i=2; $i<=count($tests) ; $i++) 
+		 	{ 
+		 		if ($var) 
+		 		{
+		 			$test = file_get_contents('downloads/'.$var.".json");
+		 			$test = json_decode($test,true);
+		 		}
+		 	} 
+		 	return $test;
+		 }
+	 	
+	}
+$test = gettest($var);
 ?>
 <!DOCTYPE html>
 <html>
@@ -37,7 +49,7 @@ $test = json_decode($test, true);
 <form action="test.php" method="post" >
 <label for="res" ><?=$test['label']?></label><br>
 <input  type="text" name="res"  id = "res" ><br>
-<input type="text" name="test_var" value="<?=$var?>" hidden><br>
+<input type="text" name="test_var" value="<?=$var?>" hidden ><br>
 <input type="submit" name="go" value="проверить"><br>
 </form>
 <a href="admin.php">админка</a>
@@ -45,19 +57,18 @@ $test = json_decode($test, true);
 </html>
 <?php 
 
-  
-if(!empty($_POST['go'])&&!empty($_POST['res'])){
-	$res = nl2br($_POST['res']);
-	$var = $_POST['test_var'];
-	$list = getdata();
-	$test = $list[$var];
-	$test = json_decode($test, true);
-	if($res==$test['result'])
+if(!empty($_POST['go'])&&!empty($_POST['res']))
 	{
-		echo "<br><h3>Правильно</h3><br>";
-	}else
-	{
-		echo "<br><h3>Неверно</h3><br>";
+		$res = nl2br($_POST['res']);
+		$variant = (int)$_POST['test_var'];
+		$test = gettest($variant);
+			if($res==$test['result'])
+			{
+				echo "<br><h3>Правильно</h3><br>";
+			}
+			else
+			{
+				echo "<br><h3>Неверно</h3><br>";
+			}
 	}
-}
 ?>

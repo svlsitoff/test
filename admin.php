@@ -9,10 +9,6 @@ if(!empty($_POST['go']) && !empty($_FILES['file']))
 		move_uploaded_file($_FILES['file']['tmp_name'], 'downloads/'.$_FILES['file']
 		['name']);
 		echo "файл загружен<br>";
-		$listing = file_get_contents('downloads/'.$_FILES['file']
-		['name']);
-		$listing = file_put_contents('listing.txt', "***".$listing."***", 
-		FILE_APPEND);
 		}else
 		{
 		echo "Невалидный тип файла";
@@ -23,30 +19,26 @@ if(!empty($_POST['go']) && !empty($_FILES['file']))
 if (!empty($_POST['del']) && !empty($_POST['del_test']))
 {
 	$del_test = nl2br($_POST['del_test']);
-	unlink("downloads/".$del_test.".json");
-	echo "файл удален";
-/*	$tests = scandir('downloads');
-	foreach ($tests as  $test) 
-	{
-		if ($test!=='.' && $test !=='..') 
-		{
-			$test = str_replace(".json", "", $test);
-			echo "$test<br>";
-		}
-	}*/
-}
-if (!empty($_POST['list'])) {
 	$tests = scandir('downloads');
-	foreach ($tests as  $test) 
+	for ($i=0; $i<count($tests) ; $i++)
 	{
-		if ($test!=='.' && $test !=='..') 
-		{
-			$test = str_replace(".json", "", $test);
-			echo "$test<br>";
-		}
+		if ($del_test.".json"===$tests[$i])
+			{
+				unlink("downloads/".$del_test.".json");
+				echo "файл удален";
+			}
 	}
+	
 }
-
+if (!empty($_POST['list'])) 
+{
+	$tests = scandir('downloads');
+	for ($i=2; $i<count($tests); $i++) 
+		{ 
+		  $tests[$i] = str_replace(".json", "", $tests[$i]);	
+		  echo $tests[$i]."<br>";
+		}	
+}
 ?>
 
 
